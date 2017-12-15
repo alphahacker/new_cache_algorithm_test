@@ -120,7 +120,11 @@ var job = {
                 for (var i=0; i<rows.length; i++) {
                   var portion =  rows[i].eachUsage / usage_sum;
                   var userMemory = MAX_MEMORY * portion;
-                  //operation_log.info("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
+                  if(rows[i].userId == '01BlackROse08'){
+                    userMemory = 500;
+                  }
+                  console.log("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
+                  operation_log.info("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
 
                   usersMemory.push({
                       userId : rows[i].userId,
