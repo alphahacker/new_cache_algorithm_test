@@ -120,7 +120,7 @@ var job = {
                 for (var i=0; i<rows.length; i++) {
                   var portion =  rows[i].eachUsage / usage_sum;
                   var userMemory = MAX_MEMORY * portion;
-                  if(rows[i].userId == '01BlackROse08'){
+                  if(rows[i].userId == '01BlackRose08'){
                     userMemory = 500;
                   }
                   console.log("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
