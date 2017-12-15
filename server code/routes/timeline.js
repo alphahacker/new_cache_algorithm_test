@@ -501,7 +501,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
       var key = req.params.userId;
       console.log("key (userId) = " + key);
       console.log("lrange start index = " + start);
-      console.log("lragne end index = " + end);
+      console.log("lrange end index = " + end);
       redisPool.indexMemory.lrange(key, start, end, function (err, result) {
           if(err){
             error_log.info("fail to get the index memory in Redis : " + err);
@@ -533,7 +533,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
           } else {
             dbPool.getConnection(function(err, conn) {
               var query_stmt = 'SELECT userLocation FROM user ' +
-                               'WHERE userId = ' + key;
+                               'WHERE userId = "' + key + '"';
               conn.query(query_stmt, function(err, result) {
                   if(err){
                     error_log.info("fail to get user location from MySQL! : " + err);
@@ -542,7 +542,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                     conn.release(); //MySQL connection release
                     rejected("fail to get user location from MySQL!");
                   }
-                  if(result == undefined || result == null){
+                  else if(result == undefined || result == null){
                     error_log.info("fail to get user location from MySQL! : There is no result.");
                     error_log.info("key (userId) : " + key + "\ㅜn");
 
