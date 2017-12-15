@@ -12,19 +12,19 @@ var interim_log = log4js.getLogger("interim");
 var memoryManager = {
 	checkMemory : function(tweetObject) {
 		var dataSize = parseInt(tweetObject.content.length) + tweetObject.contentId.toString().length;
-		//console.log("dataSize = " + dataSize);
+		console.log("dataSize = " + dataSize);
 
 		var userId = tweetObject.userId;
 		try{
 			memoryManager.getUserMemory(userId, function(remainUserMemory){
 				//interim_log.info("[User Id]= " + userId);
-				//console.log("[User Id]= " + userId);
+				console.log("[User Id]= " + userId);
 				var currRemainMemory = parseInt(remainUserMemory) - parseInt(dataSize);
-				//console.log(currRemainMemory);
+				console.log(currRemainMemory);
 				if(currRemainMemory >= 0){
 					//interim_log.info("[Current remain memory > 0] = " + currRemainMemory);
 					//interim_log.info();
-					//console.log("[Current remain memory > 0] = " + currRemainMemory);
+					console.log("[Current remain memory > 0] = " + currRemainMemory);
 					memoryManager.setUserMemory(userId, currRemainMemory, function(){
 						memoryManager.setDataInMemory(tweetObject, currRemainMemory);
 					});
