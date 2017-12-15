@@ -18,7 +18,7 @@ cron.schedule('53 * * * *', function () {
 
 var job = {
   setUserContents : function () {
-    var EACH_DATA_SIZE = 96;
+    var EACH_DATA_SIZE = 30;
     //해당 클라우드로 접속하는 사용자 리스트 알아야 한다 <-- DB에 쿼리 날려보면 됨, select * from newyork; 이런식?
 
     //2.
@@ -121,7 +121,7 @@ var job = {
                   var portion =  rows[i].eachUsage / usage_sum;
                   var userMemory = MAX_MEMORY * portion;
                   if(rows[i].userId == '01BlackRose08'){
-                    userMemory = 500;
+                    userMemory = 100;
                   }
                   console.log("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
                   operation_log.info("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
