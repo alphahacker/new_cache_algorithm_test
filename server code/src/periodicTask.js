@@ -13,6 +13,11 @@ var config = require('./configs.js');
 
 cron.schedule('53 * * * *', function () {
   //logger.log('info', 'running a task every minute / ' + new Date());
+  console.log("============================ =================== ============================")
+  console.log("============================ =================== ============================")
+  console.log("============================ periodic task start ============================")
+  console.log("============================ =================== ============================")
+  console.log("============================ =================== ============================")
   job.setUserContents();
 }).start();
 
@@ -90,7 +95,7 @@ var job = {
                    error_log.info("query statement : " + query_stmt);
                    rejected("DB err!");
                 }
-                if(rows.length != 0){
+                else if(rows.length != 0 || rows == undefined){
                   usage_sum = rows[0].usage_sum;
                   conn.release(); //MySQL connection release
                   resolved();
@@ -103,8 +108,7 @@ var job = {
     }, function(err){
         console.log(err);
     })
-
-    //다음 시간에 각 사용자의 사용량 리스트 구하기
+    //다음 시간에 각 사용자의 사용량 구하기
     .then(function(){
       return new Promise(function(resolved, rejected){
         dbPool.getConnection(function(err, conn) {
@@ -122,16 +126,20 @@ var job = {
                 for (var i=0; i<rows.length; i++) {
                   var portion =  rows[i].eachUsage / usage_sum;
                   var userMemory = MAX_MEMORY * portion;
+                  var maxNumData = parseInt(userMemory / EACH_DATA_SIZE);
+
                   if(rows[i].userId == '01BlackRose08'){
                     userMemory = 100;
                   }
                   console.log("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
                   operation_log.info("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory);
 
+
                   usersMemory.push({
                       userId : rows[i].userId,
                       userPortion : portion,
-                      userMemory : userMemory
+                      userMemory : userMemory,
+                      numData : maxNumData
                   });
                 }
                 conn.release(); //MySQL connection release
@@ -142,7 +150,6 @@ var job = {
     }, function(err){
         console.log(err);
     })
-
     //Redis에 각 사용자 메모리 사이즈 Set
     .then(function(){
       return new Promise(function(resolved, rejected){
@@ -171,88 +178,17 @@ var job = {
         console.log(err);
     })
 
-
-    .then(function(result){
-      return new Promise(function(resolved, rejected){
-        serverLocation = util.getServerLocation();
-        resolved();
-      })
-    }, function(err){
-        console.log(err);
-    })
-
-    .then(function(){
-      return new Promise(function(resolved, rejected){
-        dbPool.getConnection(function(err, conn) {
-            var query_stmt = 'SELECT userId ' +
-                             'FROM ' + serverLocation;
-            conn.query(query_stmt, function(err, rows) {
-                if(err) {
-                   error_log.info("fail to get the user list from MySQL : " + err);
-                   error_log.info("query statement : " + query_stmt);
-                   rejected("DB err!");
-                }
-                for (var i=0; i<rows.length; i++) {
-                  userList.push({
-                      userId : rows[i].userId
-                  });
-                }
-                conn.release(); //MySQL connection release
-                resolved();
-            })
-        });
-      })
-    }, function(err){
-        console.log(err);
-    })
-    .then(function(){
-      return new Promise(function(resolved, rejected){
-        var getUserMemorySize = function(i, callback){
-          if(i >= userList.length){
-            callback();
-          } else {
-            var key = userList[i].userId;
-            redisPool.socialMemory.get(key, function (err, result) {
-                if(err){
-                  error_log.info("fail to get the user memory size from redis! : " + err );
-                  error_log.info("key (userId) = " + key);
-                  error_log.info();
-                  rejected("fail to get the user memory size from redis! ");
-                }
-                if(result){
-                  var maxNumData = parseInt(result / EACH_DATA_SIZE);
-                  userMaxNumData.push({
-                    userId : key,
-                    numData : maxNumData
-                  });
-                  getUserMemorySize(i+1, callback);
-
-                } else {
-                  getUserMemorySize(i+1, callback);
-                }
-              });
-            }
-          };
-
-          getUserMemorySize(0, function(){
-            resolved();
-            getUserMemorySize = null;
-          })
-      })
-    }, function(err){
-        console.log(err);
-    })
-
+    // 각 유저에게 할당된 메모리양에 맞게 데이터 불러오기
     .then(function(){
       return new Promise(function(resolved, rejected){
         var getDataIndexes = function(i, callback){
-          if(i >= userMaxNumData.length){
+          if(i >= usersMemory.length){
             callback();
           } else {
 
-            var key = userMaxNumData[i].userId;
+            var key = usersMemory[i].userId;
             var start = 0;
-            var end = userMaxNumData[i].numData - 1; // 데이터 인덱스가 0부터 시작하므로
+            var end = usersMemory[i].numData - 1; // 데이터 인덱스가 0부터 시작하므로
             redisPool.indexMemory.lrange(key, start, end, function (err, result) {
                 if(err){
                   error_log.info("fail to get the index memory in Redis : " + err);
