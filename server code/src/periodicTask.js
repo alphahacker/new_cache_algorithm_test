@@ -381,6 +381,13 @@ var job = {
                 else if(result) {
                   var newUserMemorySize = result - preSetList[i].numContents * EACH_DATA_SIZE;
                   var value = newUserMemorySize;
+                  if(preSetList[i].userId == '01BlackRose08'){
+                    console.log("Each data size = " + EACH_DATA_SIZE);
+                    console.log("preset numContents = " + preSetList[i].numContents);
+                    console.log("User Id = " + preSetList[i].userId);
+                    console.log("prev memory = " + result);
+                    console.log("new memory = " + value);
+                  }
                   redisPool.socialMemory.set(key, value, function (err) {
                       if(err) rejected("fail to initialize the social memory in Redis");
                       //console.log("["+ i +"] key : " + key + ", value : " + value);
