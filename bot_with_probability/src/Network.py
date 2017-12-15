@@ -71,10 +71,11 @@ class Surrogate:
             delay = random.randrange(1, 6)
             time.sleep(delay / 10)
 
-        self.readOperation()
+        self.readOperation(nTotalOperation)
 
     def writeOperation(self):
         url = "http://" + self.surrogateIp + "/timeline/" + self.userId
+        Log.info("POST URL = " + url)
         value = getWriteMsgToSend(0)
 
         data = urllib.urlencode(value)
@@ -88,8 +89,9 @@ class Surrogate:
         else:
             Log.info("ERROR ! fail to communicate with surrogate server [WriteOperation][POST][" + url + "]")
 
-    def readOperation(self):
-        url = "http://" + self.surrogateIp + "/timeline/" + self.userId
+    def readOperation(self, nTotalOperation):
+        url = "http://" + self.surrogateIp + "/timeline/userId/" + self.userId + "/numAccess/" + nTotalOperation
+        Log.info("GET URL = " + url)
         response = urllib2.urlopen(url)
         resultData = response.read()
         parsedJsonData = json.loads(resultData)
