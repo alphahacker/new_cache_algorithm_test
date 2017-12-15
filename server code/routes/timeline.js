@@ -473,7 +473,7 @@ router.get('/init', function(req, res, next) {
 });
 
 //Get each user's timeline contents
-router.get('userId/:userId/numAccess/:numAccess', function(req, res, next) {
+router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
 
   /* Read 할때 Cache hit 측정해줘야 한다. */
 
