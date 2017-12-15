@@ -90,7 +90,7 @@ class Surrogate:
             Log.info("ERROR ! fail to communicate with surrogate server [WriteOperation][POST][" + url + "]")
 
     def readOperation(self, nTotalOperation):
-        url = "http://" + self.surrogateIp + "/timeline/userId/" + self.userId + "/numAccess/" + nTotalOperation
+        url = "http://" + self.surrogateIp + "/timeline/userId/" + self.userId + "/numAccess/" + str(nTotalOperation)
         Log.info("GET URL = " + url)
         response = urllib2.urlopen(url)
         resultData = response.read()
