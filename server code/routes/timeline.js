@@ -499,9 +499,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   .then(function(contentIndexList){
     return new Promise(function(resolved, rejected){
       var key = req.params.userId;
-      // console.log("key (userId) = " + key);
-      // console.log("lrange start index = " + start);
-      // console.log("lragne end index = " + end);
+      console.log("key (userId) = " + key);
+      console.log("lrange start index = " + start);
+      console.log("lragne end index = " + end);
       redisPool.indexMemory.lrange(key, start, end, function (err, result) {
           if(err){
             error_log.info("fail to get the index memory in Redis : " + err);
