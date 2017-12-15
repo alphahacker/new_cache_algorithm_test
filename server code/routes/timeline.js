@@ -510,6 +510,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
             rejected("fail to get the index memory in Redis");
           }
           contentIndexList = result;
+          console.log(contentIndexList);
           resolved(contentIndexList);
       });
     })
@@ -582,7 +583,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
               }
               if(result){
                 contentDataList.push(result);
-                //console.log("cache hit!");
+                console.log("cache hit!");
                 monitoring.cacheHit++;
                 getUserContentData(i+1, callback);
 
@@ -599,7 +600,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                       }
                       if(result){
                         contentDataList.push(result[0].message);
-                        //console.log("cache miss!");
+                        console.log("cache miss!");
                         monitoring.cacheMiss++;
                         interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
 
