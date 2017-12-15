@@ -487,10 +487,6 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   var start = 0;
   var end = req.params.numAccess * numReadContents;
 
-  console.log("numAccess = " + req.params.numAccess);
-  console.log("numReadContents = " + numReadContents);
-  console.log("end = " + end);
-
   //index memory에 있는 contents list를 저장
   var contentIndexList = [];
   var contentDataList = [];
@@ -503,9 +499,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   .then(function(contentIndexList){
     return new Promise(function(resolved, rejected){
       var key = req.params.userId;
-      console.log("key (userId) = " + key);
-      console.log("lrange start index = " + start);
-      console.log("lrange end index = " + end);
+      // console.log("key (userId) = " + key);
+      // console.log("lrange start index = " + start);
+      // console.log("lrange end index = " + end);
       redisPool.indexMemory.lrange(key, start, end, function (err, result) {
           if(err){
             error_log.info("fail to get the index memory in Redis : " + err);
