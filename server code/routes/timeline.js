@@ -487,6 +487,10 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   var start = 0;
   var end = req.params.numAccess * numReadContents;
 
+  console.log("numAccess = " + req.params.numAccess);
+  console.log("numReadContents = " + numReadContents);
+  console.log("end = " + end);
+
   //index memory에 있는 contents list를 저장
   var contentIndexList = [];
   var contentDataList = [];
@@ -583,7 +587,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
               }
               if(result){
                 contentDataList.push(result);
-                console.log("cache hit!");
+                //console.log("cache hit!");
                 monitoring.cacheHit++;
                 getUserContentData(i+1, callback);
 
@@ -600,7 +604,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                       }
                       if(result){
                         contentDataList.push(result[0].message);
-                        console.log("cache miss!");
+                        //console.log("cache miss!");
                         monitoring.cacheMiss++;
                         interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
 
