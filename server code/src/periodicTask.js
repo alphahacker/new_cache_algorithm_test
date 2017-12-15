@@ -298,7 +298,7 @@ var job = {
                                'WHERE B.userId = "' + usersContentIndexList[i].userId + '" ';
 
               var additionalQueryString = "";
-              var preSetNum = 0;
+              //var preSetNum = 0;
               for(var j=0; j<usersContentIndexList[i].indexList.length; j++){
                   additionalQueryString += function(idx) {
 
@@ -314,14 +314,14 @@ var job = {
                           } else if (idx != 0 && idx == usersContentIndexList[i].indexList.length - 1) {
                               return ' OR A.id = ' + usersContentIndexList[i].indexList[idx] + ')';
                           }
-                          preSetNum++;
+                          //preSetNum++;
 
                   }(j);
               }
 
               preSetList.push({
                 userId : usersContentIndexList[i].userId,
-                numContents : preSetNum
+                numContents : usersContentIndexList[i].indexList.length
               })
               query_stmt += additionalQueryString;
 
