@@ -42,6 +42,8 @@ var job = {
     var usersMemory = [];
     var serverLocation;
 
+    var preSetList = [];
+
     var MAX_MEMORY = config.totalMemory;
 
     var promise = new Promise(function(resolved, rejected){
@@ -296,6 +298,7 @@ var job = {
                                'WHERE B.userId = "' + usersContentIndexList[i].userId + '" ';
 
               var additionalQueryString = "";
+              var preSetNum = 0;
               for(var j=0; j<usersContentIndexList[i].indexList.length; j++){
                   additionalQueryString += function(idx) {
 
@@ -311,10 +314,15 @@ var job = {
                           } else if (idx != 0 && idx == usersContentIndexList[i].indexList.length - 1) {
                               return ' OR A.id = ' + usersContentIndexList[i].indexList[idx] + ')';
                           }
+                          preSetNum++;
 
                   }(j);
               }
 
+              preSetList.push({
+                userId : usersContentIndexList[i].userId,
+                numContents : preSetNum
+              })
               query_stmt += additionalQueryString;
 
               conn.query(query_stmt, function(err, result) {
@@ -359,6 +367,46 @@ var job = {
     .then(function(contentIndexList){
       return new Promise(function(resolved, rejected){
 
+        var modifyUserMemorySize = function(i, callback){
+          if(i >= preSetList.length){
+            callback();
+          } else {
+            var key = preSetList[i].userId;
+            redisPool.socialMemory.get(key, function (err, result) {
+                if(err){
+                  error_log.info("fail to get the user memory size in Redis : " + err);
+                  error_log.info("fail to get the user memory size in Redis : " + err);
+                  error_log.info();
+                }
+                else if(result) {
+                  var newUserMemorySize = result - preSetList[i].numContents * EACH_DATA_SIZE;
+                  var value = newUserMemorySize;
+                  redisPool.socialMemory.set(key, value, function (err) {
+                      if(err) rejected("fail to initialize the social memory in Redis");
+                      //console.log("["+ i +"] key : " + key + ", value : " + value);
+                      else {
+                        operation_log.info("["+ i +"] key (User ID) : " + key + ", value (Memory Size) : " + value);
+                        modifyUserMemorySize(i+1, callback);
+                      }
+                  });
+                }
+            });
+
+          }
+        };
+
+        modifyUserMemorySize(0, function(){
+          resolved();
+          setDataIntoMemory = null;
+        })
+
+      })
+    }, function(err){
+        console.log(err);
+    })
+    .then(function(contentIndexList){
+      return new Promise(function(resolved, rejected){
+
         var setDataIntoMemory = function(i, callback){
           if(i >= usersDataList.length){
             callback();
@@ -372,8 +420,10 @@ var job = {
                   error_log.info("key (tweetObject.contentId) : " + key + ", value (tweetObject.content) : " + value);
                   error_log.info();
                 }
+                else {
+                  setDataIntoMemory(i+1, callback);
+                }
             });
-            setDataIntoMemory(i+1, callback);
 
           }
         };
