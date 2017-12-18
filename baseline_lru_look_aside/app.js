@@ -5,7 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var flow = require('finally');
 var Promise = require('promise');
 
 // var aws = require('aws-sdk');

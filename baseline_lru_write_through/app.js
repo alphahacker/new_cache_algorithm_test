@@ -5,17 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var flow = require('finally');
 var Promise = require('promise');
-
-// var aws = require('aws-sdk');
-// var multerS3 = require('multer-s3');
-// aws.config.update({
-// secretAccessKey: '4n/EzMX8nTcTOG3LQSCvwUzSGs2J+D+Vte7TY6tL',
-// accessKeyId: 'AKIAJPACEPUSNEAEQOPA',
-// region: 'ap-northeast-2'
-// });
-// var s3 = new aws.S3();
 
 //----------------------------------------------------------------//
 

@@ -435,6 +435,175 @@ router.get('/init', function(req, res, next) {
 });
 
 //Get each user's timeline contents
+router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
+
+  /* Read 할때 Cache hit 측정해줘야 한다. */
+
+  //기본 read 개수
+  var numReadContents = 10;
+
+  //key는 사용자 ID
+  //var key = req.params.userId;
+  var userLocation;
+
+  var start = 0;
+  var end = req.params.numAccess * numReadContents;
+
+  //index memory에 있는 contents list를 저장
+  var contentIndexList = [];
+  var contentDataList = [];
+
+  var promise = new Promise(function(resolved, rejected){
+    resolved(contentIndexList);
+  });
+
+  promise
+  .then(function(contentIndexList){
+    return new Promise(function(resolved, rejected){
+      var key = req.params.userId;
+      redisPool.indexMemory.lrange(key, start, end, function (err, result) {
+          if(err){
+            error_log.info("fail to get the index memory in Redis : " + err);
+            error_log.info("key (req.params.userId) : " + key + ", start : " + start + ", end : " + end);
+            error_log.info();
+            rejected("fail to get the index memory in Redis");
+          }
+          contentIndexList = result;
+          //console.log(contentIndexList);
+          resolved(contentIndexList);
+      });
+    })
+  }, function(err){
+      console.log(err);
+  })
+  .then(function(contentIndexList){
+    return new Promise(function(resolved, rejected){
+      var key = req.params.userId;
+      redisPool.locationMemory.get(key, function (err, result) {
+          if(err){
+            error_log.info("fail to get user location from redis! : " + err);
+            error_log.info("key (req.params.userId) : " + key);
+            error_log.info();
+            rejected("fail to get user location from redis! ");
+          }
+          if(result){
+            userLocation = result;
+            resolved(contentIndexList);
+          } else {
+            dbPool.getConnection(function(err, conn) {
+              var query_stmt = 'SELECT userLocation FROM user ' +
+                               'WHERE userId = "' + key + '"';
+              conn.query(query_stmt, function(err, result) {
+                  if(err){
+                    error_log.info("fail to get user location from MySQL! : " + err);
+                    error_log.info("key (userId) : " + key + "\ㅜn");
+
+                    conn.release(); //MySQL connection release
+                    rejected("fail to get user location from MySQL!");
+                  }
+                  else if(result == undefined || result == null){
+                    error_log.info("fail to get user location from MySQL! : There is no result.");
+                    error_log.info("key (userId) : " + key + "\ㅜn");
+
+                    conn.release(); //MySQL connection release
+                    rejected("fail to get user location from MySQL!");
+                  } else {
+                    userLocation = result[0].userLocation;
+                    resolved(contentIndexList);
+                    conn.release(); //MySQL connection release
+                  }
+              })
+            });
+          }
+      });
+    })
+  }, function(err){
+      console.log(err);
+  })
+
+  .then(function(contentIndexList){
+    return new Promise(function(resolved, rejected){
+
+      var readStartTime = 0;
+      var readEndTime = 0;
+
+      readStartTime = new Date().getTime();
+      var getUserContentData = function(i, callback){
+        if(i >= contentIndexList.length){
+          callback();
+        } else {
+          var key = contentIndexList[i];
+          redisPool.dataMemory.get(key, function (err, result) {
+              if(err){
+                error_log.info("fail to push the content from data memory in redis! : " + err );
+                error_log.info("key (contentIndexList[" + i + "] = " + contentIndexList[i] + ") : " + key);
+                error_log.info();
+                rejected("fail to push the content from data memory in redis! ");
+              }
+              if(result){
+                contentDataList.push(result);
+                //console.log("cache hit!");
+                monitoring.cacheHit++;
+                getUserContentData(i+1, callback);
+
+              } else {
+                dbPool.getConnection(function(err, conn) {
+                  var query_stmt = 'SELECT message FROM content ' +
+                                   'WHERE id = ' + key;
+                  conn.query(query_stmt, function(err, result) {
+                      if(err){
+                        error_log.info("fail to get message (MySQL) : " + err);
+                        error_log.info("QUERY STMT : " + query_stmt);
+                        error_log.info();
+                        rejected("DB err!");
+                      }
+                      if(result){
+                        contentDataList.push(result[0].message);
+                        //console.log("cache miss!");
+                        monitoring.cacheMiss++;
+                        interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
+
+                      } else {
+                        error_log.error("There's no data, even in the origin mysql server!");
+                        error_log.error();
+                      }
+
+                      conn.release(); //MySQL connection release
+                      getUserContentData(i+1, callback);
+                  })
+              });
+            }
+          });
+        }
+      }
+
+      getUserContentData(0, function(){
+        readEndTime = new Date().getTime();
+        operation_log.info("[Read Execution Delay]= " + (readEndTime - readStartTime) + "ms");
+        //operation_log.info("[Read Latency Delay]= " + monitoring.getLatencyDelay(util.getServerLocation(), userLocation) + "ms");
+        operation_log.info("[Read Operation Count]= " + ++monitoring.readCount);
+        operation_log.info("[Cache Hit]= " + monitoring.cacheHit + ", [Cache Miss]= " + monitoring.cacheMiss + ", [Cache Ratio]= " + monitoring.getCacheHitRatio() + "\n");
+        resolved();
+        getUserContentData = null;
+      })
+    })
+  }, function(err){
+      console.log(err);
+  })
+
+  .then(function(){
+    return new Promise(function(resolved, rejected){
+      res.json({
+        status : "OK",
+        contents : contentDataList
+      });
+    })
+  }, function(err){
+      console.log(err);
+  })
+});
+
+//Get each user's timeline contents
 router.get('/:userId', function(req, res, next) {
 
   /* Read 할때 Cache hit 측정해줘야 한다. */
