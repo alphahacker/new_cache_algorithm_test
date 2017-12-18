@@ -488,7 +488,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
             rejected("fail to get the index memory in Redis");
           }
           contentIndexList = result;
-          console.log(contentIndexList);
+          //console.log(contentIndexList);
           resolved(contentIndexList);
       });
     })
