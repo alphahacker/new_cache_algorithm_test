@@ -133,7 +133,7 @@ class Scheduler:
         if dstLocation == 'newyork':
             surrogateIp = '165.132.104.210'
         elif dstLocation == 'texas':
-            surrogateIp = '165.132.104.206'
+            surrogateIp = '165.132.104.208'
         elif dstLocation == 'washington':
             surrogateIp = '165.132.104.209'
         else:
