@@ -30,7 +30,7 @@ cron.schedule('53 * * * *', function () {
 
 var job = {
   setUserContents : function () {
-    var EACH_DATA_SIZE = 30;
+    var EACH_DATA_SIZE = 76;
     //해당 클라우드로 접속하는 사용자 리스트 알아야 한다 <-- DB에 쿼리 날려보면 됨, select * from newyork; 이런식?
 
     //2.
