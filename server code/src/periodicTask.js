@@ -61,7 +61,10 @@ var job = {
     var promise = new Promise(function(resolved, rejected){
       redisPool.flushDataMemory();
       redisPool.flushSocialMemory();
-      resolved();
+      setTimeout(function() {
+        resolved();
+      }, 5000);
+
     });
 
     promise
@@ -135,7 +138,7 @@ var job = {
                   var userMemory = MAX_MEMORY * portion;
                   var maxNumData = parseInt(userMemory / EACH_DATA_SIZE);
 
-                  console.log("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory + ", MAXNUMDATA = " + maxNumData);
+                  //console.log("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory + ", MAXNUMDATA = " + maxNumData);
                   //operation_log.info("USER ID = " + rows[i].userId + ", PORTION = " + portion + ", MEMORY SIZE = " + userMemory + ", MAXNUMDATA = " + maxNumData);
 
                   usersMemory.push({
@@ -166,7 +169,7 @@ var job = {
             redisPool.socialMemory.set(key, value, function (err) {
                 if(err) rejected("fail to initialize the social memory in Redis");
                 //console.log("["+ i +"] key : " + key + ", value : " + value);
-                //operation_log.info("["+ i +"] key (User ID) : " + key + ", value (Memory Size) : " + value);
+                operation_log.info("["+ i +"] key (User ID) : " + key + ", value (Original Memory Size At This Time) : " + value);
                 setSocialMemoryInRedis(i+1, callback);
             });
           }
@@ -197,7 +200,7 @@ var job = {
               var start = 0;
               var end = usersMemory[i].numData - 1; // 데이터 인덱스가 0부터 시작하므로
               //console.log("Get Data Indexes Phase : Key = " + key + ", Start = " + start + ", End = " + end + ", User Max Data = " + usersMemory[i].numData);
-              //operation_log.info("Get Data Indexes Phase : Key = " + key + ", Start = " + start + ", End = " + end + ", User Max Data = " + usersMemory[i].numData);
+              operation_log.info("Get Data Indexes Phase : Key = " + key + ", Start = " + start + ", End = " + end + ", User Max Data = " + usersMemory[i].numData);
               redisPool.indexMemory.lrange(key, start, end, function (err, result) {
                   if(err){
                     error_log.info("fail to get the index memory in Redis : " + err);
@@ -332,7 +335,7 @@ var job = {
                       //console.log("["+ i +"] key : " + key + ", value : " + value);
                       else {
                         //console.log("USER ID = " + key + ", NEW MEMORY SIZE = " + value + ", CONTENTS_NUM = " + preSetList[i].numContents+ ", EACH_DATA_SIZE = " + EACH_DATA_SIZE);
-                        operation_log.info("USER ID = " + key + ", NEW MEMORY SIZE = " + value + ", CONTENTS_NUM = " + preSetList[i].numContents+ ", EACH_DATA_SIZE = " + EACH_DATA_SIZE);
+                        operation_log.info("USER ID = " + key + ", NEW MEMORY SIZE = " + value + ", CONTENTS_NUM = " + preSetList[i].numContents + ", EACH_DATA_SIZE = " + EACH_DATA_SIZE);
 
                         modifyUserMemorySize(i+1, callback);
                       }
