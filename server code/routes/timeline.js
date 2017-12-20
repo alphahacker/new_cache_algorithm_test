@@ -837,7 +837,7 @@ router.post('/:userId', function(req, res, next) {
 
   var tweetObjectList = [];
 
-  console.log("data length = " + req.body.contentData.length);
+  //console.log("data length = " + req.body.contentData.length);
 
   //2. 친구들 리스트 뽑아서
   var promise = new Promise(function(resolved, rejected){
