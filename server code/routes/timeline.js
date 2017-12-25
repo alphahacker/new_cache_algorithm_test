@@ -107,7 +107,14 @@ router.get('/init', function(req, res, next) {
   .then(function(){
     return new Promise(function(resolved, rejected){
       dbPool.getConnection(function(err, conn) {
-          var next_hour = current_hour + 1; // 다음 시간의 사용량을 보고, 미리 캐싱하는 것이므로
+          var next_hour = 0;
+          if(current_hour == 23){
+            next_hour = 0;
+          }
+          else {
+            next_hour = current_hour + 1; // 다음 시간의 사용량을 보고, 미리 캐싱하는 것이므로
+          }
+          
           var query_stmt = 'SELECT SUM(B.' + next_hour + 'h) AS usage_sum ' +
                            'FROM ' + serverLocation + ' A JOIN user_usage B ' +
                            'ON A.userId = B.userId';
