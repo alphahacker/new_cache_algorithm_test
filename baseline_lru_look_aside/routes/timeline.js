@@ -461,6 +461,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   .then(function(contentIndexList){
     return new Promise(function(resolved, rejected){
       var key = req.params.userId;
+      // console.log("key (userId) = " + key);
+      // console.log("lrange start index = " + start);
+      // console.log("lragne end index = " + end);
       redisPool.indexMemory.lrange(key, start, end, function (err, result) {
           if(err){
             error_log.info("fail to get the index memory in Redis : " + err);
@@ -469,7 +472,6 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
             rejected("fail to get the index memory in Redis");
           }
           contentIndexList = result;
-          //console.log(contentIndexList);
           resolved(contentIndexList);
       });
     })
@@ -492,7 +494,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
           } else {
             dbPool.getConnection(function(err, conn) {
               var query_stmt = 'SELECT userLocation FROM user ' +
-                               'WHERE userId = "' + key + '"';
+                               'WHERE userId = ' + key;
               conn.query(query_stmt, function(err, result) {
                   if(err){
                     error_log.info("fail to get user location from MySQL! : " + err);
@@ -501,7 +503,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                     conn.release(); //MySQL connection release
                     rejected("fail to get user location from MySQL!");
                   }
-                  else if(result == undefined || result == null){
+                  if(result == undefined || result == null){
                     error_log.info("fail to get user location from MySQL! : There is no result.");
                     error_log.info("key (userId) : " + key + "\ㅜn");
 
@@ -558,10 +560,20 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                         rejected("DB err!");
                       }
                       if(result){
-                        contentDataList.push(result[0].message);
-                        //console.log("cache miss!");
-                        monitoring.cacheMiss++;
-                        interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
+                        var value = result[0].message;
+                        redisPool.dataMemory.set(key, value, function (err) {
+                           if(err){
+                             error_log.info("fail to push the content into friend's data memory in Redis : " + err);
+                             error_log.info("key (tweetObject.contentId) : " + key + ", value (tweetObject.content) : " + value);
+                             error_log.info();
+                           }
+                           else {
+                             contentDataList.push(value);
+                             //console.log("cache miss!");
+                             monitoring.cacheMiss++;
+                             //operation_log.info("[Cache Hit]= " + monitoring.cacheHit + ", [Cache Miss]= " + monitoring.cacheMiss + ", [Cache Ratio]= " + monitoring.getCacheHitRatio());
+                           }
+                        });
 
                       } else {
                         error_log.error("There's no data, even in the origin mysql server!");
@@ -582,7 +594,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
         operation_log.info("[Read Execution Delay]= " + (readEndTime - readStartTime) + "ms");
         //operation_log.info("[Read Latency Delay]= " + monitoring.getLatencyDelay(util.getServerLocation(), userLocation) + "ms");
         operation_log.info("[Read Operation Count]= " + ++monitoring.readCount);
+        //operation_log.info("[Read Traffic]= " + (monitoring.readCount * (end-start+1)));
         operation_log.info("[Cache Hit]= " + monitoring.cacheHit + ", [Cache Miss]= " + monitoring.cacheMiss + ", [Cache Ratio]= " + monitoring.getCacheHitRatio() + "\n");
+        //operation_log.info();
         resolved();
         getUserContentData = null;
       })
