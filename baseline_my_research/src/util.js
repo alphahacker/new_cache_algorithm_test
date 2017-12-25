@@ -5,6 +5,7 @@ var count = 0;
 
 var util = {
   serverIp : function (cb) {
+    console.log("this server ip : " + ip.address());
     //console.log("addr test 2 : " + ip.address());
     return ip.address();
 
@@ -40,7 +41,7 @@ var util = {
     var thisServerIp = util.serverIp();
     //console.log("this server ip : " + thisServerIp);
 
-    if(thisServerIp == '192.168.0.8') { //test
+    if(thisServerIp == '192.168.0.7') { //test
         serverLocation = 'newyork';
     }
     else if(thisServerIp == '165.132.104.210') {
@@ -56,7 +57,7 @@ var util = {
         serverLocation = 'washington';
     }
     else {
-        console.log("Wrong access IP!");
+        console.log("Wrong access IP!!");
     }
 
     //console.log("server location : " + serverLocation);

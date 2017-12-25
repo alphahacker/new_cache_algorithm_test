@@ -89,6 +89,9 @@ var init = function() {
       else if (thisServerIp == '165.132.104.209') {
           redisIp = '165.132.104.209';
       }
+      else if (thisServerIp == '192.168.0.7') {
+          redisIp = '192.168.0.7';
+      }
       else {
           console.log("Wrong access IP!");
       }

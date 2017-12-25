@@ -471,6 +471,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   //index memory에 있는 contents list를 저장
   var contentIndexList = [];
   var contentDataList = [];
+  var tweetObject = {};
 
   var promise = new Promise(function(resolved, rejected){
     resolved(contentIndexList);
@@ -577,8 +578,15 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                         rejected("DB err!");
                       }
                       if(result){
+                        tweetObject.userId = req.params.userId;
+                        tweetObject.contentId = contentIndexList[i];
+                        tweetObject.content = result[0].message;
+
+                        memoryManager.checkMemory(tweetObject);
+
                         contentDataList.push(result[0].message);
                         //console.log("cache miss!");
+
                         monitoring.cacheMiss++;
                         interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
 
