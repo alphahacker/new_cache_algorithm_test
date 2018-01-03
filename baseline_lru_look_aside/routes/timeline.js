@@ -440,7 +440,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   /* Read 할때 Cache hit 측정해줘야 한다. */
 
   //기본 read 개수
-  var numReadContents = 10;
+  var numReadContents = 1;
+  // var numReadContents = 10;
+  // var numReadContents = 100;
 
   //key는 사용자 ID
   //var key = req.params.userId;

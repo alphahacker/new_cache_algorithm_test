@@ -48,7 +48,7 @@ var monitoring = {
   },
 
   getTrafficPerHour : function () {
-
+    return monitoring.thisHour;
   },
 
   getTrafficPerDay : function () {

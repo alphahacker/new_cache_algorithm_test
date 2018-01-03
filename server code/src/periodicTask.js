@@ -10,6 +10,7 @@ var redisPool = require('./caching.js');
 var dbPool = require('./db.js');
 var util = require('./util.js');
 var config = require('./configs.js');
+var monitoring = require('./monitoring.js');
 
 cron.schedule('53 * * * *', function () {
   //logger.log('info', 'running a task every minute / ' + new Date());
@@ -24,6 +25,10 @@ cron.schedule('53 * * * *', function () {
   operation_log.info("============================ periodic task start ============================")
   operation_log.info("============================ =================== ============================")
   operation_log.info("============================ =================== ============================")
+
+  operation_log.info("READ TRAFFIC = " + monitoring.thisHourRead + ", WRITE TRAFFIC = " + monitoring.thisHourWrite);
+  monitoring.thisHourRead = 0;
+  monitoring.thisHourWrite = 0;
 
   job.setUserContents();
 }).start();

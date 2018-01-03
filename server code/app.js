@@ -64,6 +64,8 @@ var init = function() {
     monitoring.traffic = 0;
     monitoring.readCount = 0;
     monitoring.writeCount = 0;
+    monitoring.thisHourRead = 0;
+    monitoring.thisHourWrite = 0;
 
     //각자의 서버에서 자신의 IP를 파악한 후,
     //그 IP값을 이용해서 각자의 Redis에 커넥션을 맺는다.

@@ -492,7 +492,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   /* Read 할때 Cache hit 측정해줘야 한다. */
 
   //기본 read 개수
-  var numReadContents = 10;
+  var numReadContents = 1;
+  // var numReadContents = 10;
+  // var numReadContents = 100;
 
   //key는 사용자 ID
   //var key = req.params.userId;
@@ -639,9 +641,13 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
 
       getUserContentData(0, function(){
         readEndTime = new Date().getTime();
+
+        monitoring.thisHourRead += req.params.numAccess * numReadContents * 76;
+
         operation_log.info("[Read Execution Delay]= " + (readEndTime - readStartTime) + "ms");
         //operation_log.info("[Read Latency Delay]= " + monitoring.getLatencyDelay(util.getServerLocation(), userLocation) + "ms");
         operation_log.info("[Read Operation Count]= " + ++monitoring.readCount);
+        //operation_log.info("[Read Operation Count]= " + ++monitoring.readCount + ", [This Hour Traffic Til Now] = " + monitoring.thisHour);
         operation_log.info("[Cache Hit]= " + monitoring.cacheHit + ", [Cache Miss]= " + monitoring.cacheMiss + ", [Cache Ratio]= " + monitoring.getCacheHitRatio() + "\n");
         resolved();
         getUserContentData = null;
@@ -1182,7 +1188,10 @@ router.post('/:userId', function(req, res, next) {
         res.json({
           "status" : "OK"
         })
-        operation_log.info("[Write Operation Count]= " + ++monitoring.writeCount + "\n");
+
+        monitoring.thisHourWrite += 76;
+        //operation_log.info("[Write Operation Count]= " + ++monitoring.writeCount  + ", [This Hour Traffic Til Now] = " + monitoring.thisHour + "\n");
+        operation_log.info("[Write Operation Count]= " + ++monitoring.writeCount);
         //operation_log.info("[Write Traffic]= " + (monitoring.writeCount * req.body.contentData.length) + "B");
         //operation_log.info();
         tweetObjectList = null;
