@@ -24,41 +24,6 @@ var app = express();
 
 //---------------------------------------------------------------------------//
 
-router.get('/test', function(req, res, next) {
-  console.log("process pid : " + process.pid);
-
-  res.json({
-    "status" : "complete"
-  })
-
-});
-
-router.post('/test', function(req, res, next) {
-  console.log("process pid : " + process.pid);
-  console.log("req.body.test = " + req.body.test);
-  res.json({
-    "status" : "complete"
-  })
-
-});
-
-router.get('/test2/:userId', function(req, res, next) {
-  console.log("=============================");
-  console.log("process pid = " + process.pid);
-  console.log("user ID = " + req.params.userId);
-
-  var key = req.params.userId;
-  redisPool.socialMemory.get(key, function (err, result) {
-      if(err) console.log("get social memory error!");
-      console.log("social memory = " + result);
-      console.log("=============================");
-
-      res.json({
-        "status" : "complete"
-      })
-  });
-});
-
 router.get('/init', function(req, res, next) {
 
   /* db 에서 각 사용자에게 할당된 메모리 양 가지고 오기 */
@@ -492,9 +457,9 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
   /* Read 할때 Cache hit 측정해줘야 한다. */
 
   //기본 read 개수
-  var numReadContents = 1;
+  // var numReadContents = 1;
   // var numReadContents = 10;
-  // var numReadContents = 100;
+  var numReadContents = 100;
 
   //key는 사용자 ID
   //var key = req.params.userId;
