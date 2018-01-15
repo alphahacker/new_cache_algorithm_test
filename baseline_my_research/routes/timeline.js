@@ -555,7 +555,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                         //console.log("cache miss!");
 
                         monitoring.cacheMiss++;
-                        interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
+                        //interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
 
                       } else {
                         error_log.error("There's no data, even in the origin mysql server!");

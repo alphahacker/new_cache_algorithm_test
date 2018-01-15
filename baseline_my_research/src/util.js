@@ -5,8 +5,6 @@ var count = 0;
 
 var util = {
   serverIp : function (cb) {
-    console.log("this server ip : " + ip.address());
-    //console.log("addr test 2 : " + ip.address());
     return ip.address();
 
     // dns.lookup(os.hostname(), function(err, add, fam){

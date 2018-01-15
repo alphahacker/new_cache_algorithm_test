@@ -588,7 +588,7 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
                         //console.log("cache miss!");
 
                         monitoring.cacheMiss++;
-                        interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
+                        //interim_log.info("[Cache Miss] USER ID = " + req.params.userId + ", CONTENT ID = " + key  + ", START INDEX = " + start + ", END INDEX = " + end + ", MISS INDEX = " + i);
 
                       } else {
                         error_log.error("There's no data, even in the origin mysql server!");
@@ -607,10 +607,11 @@ router.get('/userId/:userId/numAccess/:numAccess', function(req, res, next) {
       getUserContentData(0, function(){
         readEndTime = new Date().getTime();
 
-        monitoring.thisHourRead += req.params.numAccess * numReadContents * 76;
-
         operation_log.info("[Read Execution Delay]= " + (readEndTime - readStartTime) + "ms");
         //operation_log.info("[Read Latency Delay]= " + monitoring.getLatencyDelay(util.getServerLocation(), userLocation) + "ms");
+        
+        monitoring.thisHourRead += req.params.numAccess * numReadContents * 76;
+
         operation_log.info("[Read Operation Count]= " + ++monitoring.readCount);
         //operation_log.info("[Read Operation Count]= " + ++monitoring.readCount + ", [This Hour Traffic Til Now] = " + monitoring.thisHour);
         operation_log.info("[Cache Hit]= " + monitoring.cacheHit + ", [Cache Miss]= " + monitoring.cacheMiss + ", [Cache Ratio]= " + monitoring.getCacheHitRatio() + "\n");
